@@ -27,9 +27,6 @@ func checkConfig(cfg *DownloadConfig) error {
 	if cfg == nil {
 		return ErrF1DownloadConfigFunc("nil config")
 	}
-	// if !dirExists(cfg.Dest) {
-	// 	return ErrF1DownloadConfigFunc("invalid dir")
-	// }
 	return nil
 }
 
