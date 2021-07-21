@@ -28,11 +28,34 @@ func TestF1_Export_PositionFrames(t *testing.T) {
 	require.NoError(t, err)
 	s := f1.NewExportService(tmp)
 
-	ctx := context.TODO()
-	exportedFile, err := s.Export(ctx, "/foo", frames, f1.ExportFormatProto)
-	assert.NoError(t, err)
+	t.Run("JSON", func(t *testing.T) {
+		ctx := context.TODO()
+		exportedFile, err := s.Export(ctx, "/foo", frames, f1.ExportFormatJSON)
+		assert.NoError(t, err)
 
-	stat, err := os.Stat(exportedFile)
-	assert.NoError(t, err)
-	assert.Equal(t, "Position.pb", stat.Name())
+		stat, err := os.Stat(exportedFile)
+		assert.NoError(t, err)
+		assert.Equal(t, "Position.jsonl", stat.Name())
+	})
+
+	t.Run("Gob", func(t *testing.T) {
+		ctx := context.TODO()
+		exportedFile, err := s.Export(ctx, "/foo/", frames, f1.ExportFormatGob)
+		assert.NoError(t, err)
+
+		stat, err := os.Stat(exportedFile)
+		assert.NoError(t, err)
+		assert.Equal(t, "Position.gob", stat.Name())
+	})
+
+	t.Run("Protobuf", func(t *testing.T) {
+		ctx := context.TODO()
+		exportedFile, err := s.Export(ctx, "/foo/", frames, f1.ExportFormatProto)
+		assert.NoError(t, err)
+
+		stat, err := os.Stat(exportedFile)
+		assert.NoError(t, err)
+		assert.Equal(t, "Position.pb", stat.Name())
+	})
+
 }
