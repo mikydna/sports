@@ -1,16 +1,20 @@
 package livetiming
 
 import (
-	"strings"
-	"unicode"
+	"bytes"
+	"compress/flate"
+	"encoding/base64"
+	"io/ioutil"
+	"time"
 
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
+	"github.com/spkg/bom"
 )
 
 var (
-	DateFormat = "2006-01-02"
+	DateFormat        = "2006-01-02"
+	SessionTimeFormat = "15:04:05.000"
+	SessionTimeOffset = time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC)
+	LineDelimiter     = []byte("\n")
 )
 
 /** from FastF1
@@ -41,14 +45,15 @@ var (
 type File uint
 
 const (
-	FileSessionInfo File = iota + 1 // SessionInfo.json
-	FileDriverList                  // DriverList.jsonStream
-	FilePosition                    // Position.z.jsonStream
-	FileCarData                     // CarData.z.jsonStream
-	FileTimingStats                 // TimingStats.jsonStream
-	FileLapCount                    // LapCount.jsonStream
-	FileTimingData                  // TimingData.jsonStream
-	FileTeamRadio                   // TeamRadio.jsonStream
+	FileSessionInfo   File = iota + 1 // SessionInfo.json
+	FileDriverList                    // DriverList.jsonStream
+	FilePosition                      // Position.z.jsonStream
+	FileCarData                       // CarData.z.jsonStream
+	FileTimingStats                   // TimingStats.jsonStream
+	FileLapCount                      // LapCount.jsonStream
+	FileTimingData                    // TimingData.jsonStream
+	FileTimingAppData                 // TimingAppData.jsonStream
+	FileTeamRadio                     // TeamRadio.jsonStream
 )
 
 var AllFiles []File = []File{
@@ -57,16 +62,40 @@ var AllFiles []File = []File{
 	FilePosition,    // position (xyz)
 	FileCarData,     // channels
 	FileTimingStats,
+	FileTimingAppData,
 	FileTeamRadio,
 	// FileLapCount,
 	// FileTimingData,
 }
 
-func normPath(s string) string {
-	fn := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
-	x, _, e := transform.String(fn, s)
-	if e != nil {
-		panic(e)
+func DecodeLine(b []byte, compressed bool) (time.Duration, []byte, error) {
+	// livetimingdata is utf-bom; strip bom data
+	cleanB := bom.Clean(b)
+
+	// time (fixed size: 12b)
+	t, err := time.Parse(SessionTimeFormat, string(cleanB[:12]))
+	if err != nil {
+		// panic(err)
+		return -1, nil, err
 	}
-	return strings.Replace(x, " ", "_", -1)
+
+	offset := t.Sub(SessionTimeOffset)
+
+	// data
+	datab := bytes.Trim(cleanB[12:], `"`)
+	if compressed {
+		_, err := base64.StdEncoding.Decode(datab, datab)
+		if err != nil {
+			return -1, nil, err
+		}
+
+		r := flate.NewReader(bytes.NewBuffer(datab))
+		datab, err = ioutil.ReadAll(r)
+		if err != nil {
+			return -1, nil, err
+		}
+
+	}
+
+	return offset, datab, nil
 }

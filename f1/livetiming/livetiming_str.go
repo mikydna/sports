@@ -15,12 +15,13 @@ func _() {
 	_ = x[FileTimingStats-5]
 	_ = x[FileLapCount-6]
 	_ = x[FileTimingData-7]
-	_ = x[FileTeamRadio-8]
+	_ = x[FileTimingAppData-8]
+	_ = x[FileTeamRadio-9]
 }
 
-const _File_name = "SessionInfo.jsonDriverList.jsonStreamPosition.z.jsonStreamCarData.z.jsonStreamTimingStats.jsonStreamLapCount.jsonStreamTimingData.jsonStreamTeamRadio.jsonStream"
+const _File_name = "SessionInfo.jsonDriverList.jsonStreamPosition.z.jsonStreamCarData.z.jsonStreamTimingStats.jsonStreamLapCount.jsonStreamTimingData.jsonStreamTimingAppData.jsonStreamTeamRadio.jsonStream"
 
-var _File_index = [...]uint8{0, 16, 37, 58, 78, 100, 119, 140, 160}
+var _File_index = [...]uint8{0, 16, 37, 58, 78, 100, 119, 140, 164, 184}
 
 func (i File) String() string {
 	i -= 1

@@ -10,8 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/hashicorp/go-multierror"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 const (
@@ -125,4 +129,13 @@ func progressDownload(c chan<- *DownloadProgress, src, dst string, skipped bool,
 	case c <- &DownloadProgress{src, dst, skipped, err, pct}:
 	default:
 	}
+}
+
+func normPath(s string) string {
+	fn := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	x, _, e := transform.String(fn, s)
+	if e != nil {
+		panic(e)
+	}
+	return strings.Replace(x, " ", "_", -1)
 }

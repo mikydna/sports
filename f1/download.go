@@ -70,7 +70,7 @@ func (s *DownloadService) Download(ctx context.Context, cfg *DownloadConfig) err
 			// run download in thread
 			grp.Go(func() error {
 				downloadOpts := &livetiming.DownloadOptions{
-					SkipIfExists: false,
+					SkipIfExists: true,
 					Progress:     nil,
 				}
 
