@@ -29,7 +29,10 @@ func TestF1_Export_PositionFrames(t *testing.T) {
 	s := f1.NewExportService(tmp)
 
 	ctx := context.TODO()
-	err = s.Export(ctx, "/foo/", frames, f1.ExportFormatProto)
+	exportedFile, err := s.Export(ctx, "/foo", frames, f1.ExportFormatProto)
 	assert.NoError(t, err)
 
+	stat, err := os.Stat(exportedFile)
+	assert.NoError(t, err)
+	assert.Equal(t, "Position.pb", stat.Name())
 }

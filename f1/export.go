@@ -33,10 +33,10 @@ func NewExportService(workspace string) *ExportService {
 	return &ExportService{workspace}
 }
 
-func (s *ExportService) Export(ctx context.Context, dst string, data interface{}, format ExportFormat) error {
-	dir := filepath.Join(s.workspace, dst)
+func (s *ExportService) Export(ctx context.Context, dst string, data interface{}, format ExportFormat) (string, error) {
+	dir := filepath.Clean(filepath.Join(s.workspace, dst+"/")) // ensure its a dir
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return err
+		return "", err
 	}
 
 	switch val := data.(type) {
@@ -46,31 +46,33 @@ func (s *ExportService) Export(ctx context.Context, dst string, data interface{}
 		switch format {
 		case ExportFormatJSON:
 			if err := exportJSON(fp, data); err != nil {
-				return err
+				return "", err
 			}
 		case ExportFormatGob:
 			if err := exportGob(fp, data); err != nil {
-				return err
+				return "", err
 			}
 		case ExportFormatProto:
 			b, err := val.ProtoBytes()
 			if err != nil {
-				return err
+				return "", err
 			}
 
 			if err := os.WriteFile(fp, b, 0644); err != nil {
-				return err
+				return "", err
 			}
 
+			return fp, nil
+
 		default:
-			return ErrExportUnsupportedFormat
+			return "", ErrExportUnsupportedFormat
 		}
 
 	default:
-		return ErrExportUnknownData
+		return "", ErrExportUnknownData
 	}
 
-	return nil
+	return "", nil
 }
 
 func exportJSON(fp string, data interface{}) error {
