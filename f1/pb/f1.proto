@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "github.com/mikydna/gl/f1/pb";
+
+package f1;
+
+enum PositionStatus {
+  UNKNOWN = 0;
+  ONTRACK = 1;
+  OFFTRACK = 2;
+}
+
+message Position {
+  fixed64 xyz = 2;
+  PositionStatus status = 3;
+}
+
+message PositionFrame {
+  int32 offset = 1;
+  int64 timestamp = 2;
+  map<fixed32, Position> position = 3;
+}
+
+message PositionRequest {
+  string sessionID = 1;
+  int64 start = 2;
+  int64 duration = 3;
+}
+
+service F1 {
+  rpc position(PositionRequest) returns (stream PositionFrame);
+}
