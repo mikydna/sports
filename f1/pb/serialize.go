@@ -18,12 +18,10 @@ func Write(w io.Writer, msg protoreflect.ProtoMessage) error {
 	}
 
 	size := uint32(len(b))
-	sizeb := make([]byte, 4)
-	order.PutUint32(sizeb, size)
-
-	if _, err := w.Write(sizeb); err != nil {
+	if err := binary.Write(w, order, size); err != nil {
 		return err
 	}
+
 	if _, err := w.Write(b); err != nil {
 		return err
 	}
@@ -33,12 +31,10 @@ func Write(w io.Writer, msg protoreflect.ProtoMessage) error {
 
 // read msg size, then message
 func Read(r io.Reader, msg protoreflect.ProtoMessage) error {
-	sizeb := make([]byte, 4)
-	if _, err := io.ReadFull(r, sizeb); err != nil {
+	var size uint32
+	if err := binary.Read(r, order, &size); err != nil {
 		return err
 	}
-
-	size := binary.LittleEndian.Uint32(sizeb)
 
 	b := make([]byte, size)
 	if _, err := io.ReadFull(r, b); err != nil {
