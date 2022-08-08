@@ -1,7 +1,6 @@
 package cmd_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +12,7 @@ import (
 )
 
 func TestCmd_ParseF1Config(t *testing.T) {
-	dir, err := ioutil.TempDir(os.TempDir(), "TestCmd_ParseF1Config-")
+	dir, err := os.MkdirTemp(os.TempDir(), "TestCmd_ParseF1Config-")
 	require.NoError(t, err)
 	defer os.RemoveAll(dir)
 
@@ -37,7 +36,7 @@ func TestCmd_ParseF1Config(t *testing.T) {
 }
 
 func tempF1Config(t *testing.T, dir, name string, cfg *cmd.F1Config) string {
-	f, err := ioutil.TempFile(dir, name)
+	f, err := os.CreateTemp(dir, name)
 	require.NoError(t, err)
 	err = yaml.NewEncoder(f).Encode(cfg)
 	require.NoError(t, err)

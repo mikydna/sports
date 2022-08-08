@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/flate"
 	"encoding/base64"
-	"io/ioutil"
+	"io"
 	"time"
 
 	"github.com/spkg/bom"
@@ -90,7 +90,7 @@ func DecodeLine(b []byte, compressed bool) (time.Duration, []byte, error) {
 		}
 
 		r := flate.NewReader(bytes.NewBuffer(datab))
-		datab, err = ioutil.ReadAll(r)
+		datab, err = io.ReadAll(r)
 		if err != nil {
 			return -1, nil, err
 		}

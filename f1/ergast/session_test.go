@@ -2,7 +2,7 @@ package ergast_test
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,7 +18,7 @@ func TestErgast_Sessions(t *testing.T) {
 	f, err := os.Open("./_testdata/session-2019.json")
 	require.NoError(t, err)
 	defer f.Close()
-	testdata, err := ioutil.ReadAll(f)
+	testdata, err := io.ReadAll(f)
 	require.NoError(t, err)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
